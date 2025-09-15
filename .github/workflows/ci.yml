@@ -37,8 +37,9 @@ jobs:
         uses: aquasecurity/trivy-action@0.20.0
         with:
           image-ref: ${{ steps.login-ecr.outputs.registry }}/app-portfolio:${GITHUB_SHA::8}
-          format: 'table'
-          exit-code: '1'
+          format: table
+          exit-code: 1
+          vuln-type: "os,library"
           severity: 'CRITICAL,HIGH'
 
       - name: Push Docker image to ECR
