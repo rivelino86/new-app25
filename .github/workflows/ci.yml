@@ -31,7 +31,7 @@ jobs:
 
       - name: Build, Tag, and Push Docker image to ECR
         env:
-          ECR_REGISTRY: ${{ 313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio }}
+          ECR_REGISTRY:  "313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio"
           ECR_REPOSITORY: app-portfolio   # must exist in ECR
           IMAGE_TAG: ${{ github.run_number }}
         run: |
