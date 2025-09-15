@@ -36,13 +36,14 @@ jobs:
       - name: Run Trivy scan (local image)
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: app-portfolio:${{ github.run_number }}
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/app-portfolio:${GITHUB_SHA::8}
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
 
       - name: Push Docker image to ECR
         run: |
+          IMAGE_TAG=${GITHUB_SHA::8}
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
