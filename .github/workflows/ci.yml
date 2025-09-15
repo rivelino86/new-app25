@@ -22,7 +22,6 @@ jobs:
       - name: Login to Amazon ECR
         id: build-image
         run: |
-            IMAGE_TAG=${GITHUB_SHA::8}   # short SHA
             IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/app-portfolio
             echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
             echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
