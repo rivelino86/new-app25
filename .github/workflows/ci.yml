@@ -1,0 +1,73 @@
+
+name: CI
+
+on:
+  
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+ 
+ 
+jobs:
+  
+  build:
+    
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # change to your region
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Docker image to ECR
+        env:
+          ECR_REGISTRY: ${{ 313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio }}
+          ECR_REPOSITORY: app-portfolio   # must exist in ECR
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          # Build image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+      - name: Run Trivy scan
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/portfolio:${{ github.run_number }}
+          format: 'table'
+          exit-code: '1' # fail the build if vulnerabilities are found
+          severity: 'CRITICAL,HIGH'
+
+      - name: Push Docker image to ECR
+        if: success() # only push if scan passes
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: portfolio
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+     - name: SSH to server
+       uses: appleboy/ssh-action@v1
+       with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        #port: ${{ secrets.PORT }}
+        script: |
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 313715282743.dkr.ecr.us-east-1.amazonaws.com
+                docker rm -f resume
+                docker  docker run -d --name resume -p 8080:5001 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/portfolio:${{ github.run_number }}
