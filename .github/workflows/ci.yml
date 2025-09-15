@@ -29,7 +29,7 @@ jobs:
           ECR_REPOSITORY: app-portfolio
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build -t app-portfolio:${{ github.run_number }} .
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
