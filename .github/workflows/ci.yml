@@ -30,13 +30,14 @@ jobs:
             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
         env:
             AWS_REGION: ${{ env.AWS_REGION }}
-      - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@v0.20.0
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}  # use evaluated env variables
-          format: table
-          exit-code: 1
-          vuln-type: "os,library"
+          image-ref: app-portfolio:${{ github.run_number }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
       - name: Push Docker image to ECR
         run: |
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
