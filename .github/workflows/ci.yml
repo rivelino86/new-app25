@@ -20,16 +20,19 @@ jobs:
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
-        id: build-image
-        run: |
-            IMAGE_NAME=${{ steps.login-ecr.outputs.registry }}/app-portfolio
-            echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-            echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-            docker build -t $IMAGE_NAME:$IMAGE_TAG .
-            docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
         env:
-            AWS_REGION: ${{ env.AWS_REGION }}
-      
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: app-portfolio
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
         with:
