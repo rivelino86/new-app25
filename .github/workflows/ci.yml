@@ -61,9 +61,10 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            aws-account-id: ${{secrets.AWS_ACCOUNT_ID}}
+            
             aws ecr get-login-password --region us-east-1 \
               | docker login --username AWS --password-stdin 313715282743.dkr.ecr.us-east-1.amazonaws.com
             echo "deployment is successfuly working"
             docker run -d --name resume -p 8080:5001 \
-              ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/app-portfolio:${{ github.run_number }}
+            313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio:${{ github.run_number }}
+
