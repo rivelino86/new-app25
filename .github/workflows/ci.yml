@@ -30,8 +30,8 @@ jobs:
           ECR_REPOSITORY: app-portfolio
           IMAGE_TAG: ${{ github.run_number }}
         run: |
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
             
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.28.0
@@ -68,7 +68,6 @@ jobs:
             export AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }}
             
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 313715282743.dkr.ecr.us-east-1.amazonaws.com
-            docker rm -f resume || true
             docker run -d --name resume -p 8080:5001 313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio:${{ github.run_number }}
             
             echo "Deployment completed successfully!"
