@@ -31,7 +31,6 @@ jobs:
           IMAGE_TAG: ${{ github.run_number }}
         run: |
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
             
       - name: Run Trivy vulnerability scanner
@@ -69,7 +68,8 @@ jobs:
              aws ecr get-login-password --region us-east-1 | docker login --username AWS \
              --password-stdin 313715282743.dkr.ecr.us-east-1.amazonaws.com
              echo "deployment is successfuly working"
-             docker run -d --name my-app -p 8080:5001 313715282743.dkr.ecr.us-east-1.amazonaws.\
+             docker rm -f resume || true
+             docker run -d --name resume -p 8080:5001 313715282743.dkr.ecr.us-east-1.amazonaws.\
              com/app-portfolio:${{ github.run_number }}
 
 
