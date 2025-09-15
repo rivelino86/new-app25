@@ -67,7 +67,9 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             export AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }}
             
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 313715282743.dkr.ecr.us-east-1.amazonaws.com
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin \
+            313715282743.dkr.ecr.us-east-1.amazonaws.com
+            docker rm -f resume || true
             docker run -d --name resume -p 8080:5001 313715282743.dkr.ecr.us-east-1.amazonaws.com/app-portfolio:${{ github.run_number }}
             
             echo "Deployment completed successfully!"
